@@ -27,6 +27,7 @@ import { BookCover } from '@/components/books/BookCover';
 import { BookStatusBadge } from '@/components/books/BookStatusBadge';
 import { BookImageGallery } from '@/components/books/BookImageGallery';
 import { BookUploader } from '@/components/books/BookUploader';
+import { EditPersonalInfoModal } from '@/components/books/EditPersonalInfoModal';
 import { ReadingProgressCard } from '@/components/reading/ReadingProgressCard';
 import { ReadingSessionModal } from '@/components/reading/ReadingSessionModal';
 import { ReadingHistory } from '@/components/reading/ReadingHistory';
@@ -53,6 +54,7 @@ export default function BookDetailPage() {
   const deleteNoteMutation = useDeleteBookNote();
 
   // Modals state
+  const [isEditPersonalModalOpen, setIsEditPersonalModalOpen] = useState(false);
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<BookNote | null>(null);
@@ -170,6 +172,16 @@ export default function BookDetailPage() {
 
           <Button
             size="sm"
+            variant="outline"
+            onClick={() => setIsEditPersonalModalOpen(true)}
+            className="h-8 px-2.5 text-xs gap-1 text-stone-700 hover:text-[#1e3a2f]"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sửa thông tin cá nhân</span>
+          </Button>
+
+          <Button
+            size="sm"
             variant="destructive"
             onClick={() => setIsDeleteConfirmOpen(true)}
             className="h-8 px-2.5 text-xs gap-1"
@@ -244,10 +256,22 @@ export default function BookDetailPage() {
 
           {/* Personal Purchase & Ownership Information Box */}
           <div className="rounded-2xl border border-[#e7e2d9] dark:border-stone-800 bg-white dark:bg-stone-900 p-5 shadow-xs space-y-3">
-            <h3 className="font-serif text-base font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
-              Thông tin sở hữu cá nhân
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-base font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+                Thông tin sở hữu cá nhân
+              </h3>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditPersonalModalOpen(true)}
+                className="text-xs gap-1.5 h-7 px-2.5 text-[#1e3a2f] border-[#1e3a2f]/30 hover:bg-emerald-50"
+              >
+                <Edit3 className="h-3 w-3" />
+                Chỉnh sửa
+              </Button>
+            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
               <div className="space-y-0.5">
@@ -303,6 +327,27 @@ export default function BookDetailPage() {
             {book.notes && (
               <div className="pt-2 border-t border-stone-100 dark:border-stone-800 text-xs text-stone-600 dark:text-stone-400">
                 <span className="font-medium text-stone-500">Ghi chú riêng:</span> {book.notes}
+              </div>
+            )}
+
+            {/* Tags preview */}
+            {book.tags && book.tags.length > 0 && (
+              <div className="pt-2 border-t border-stone-100 dark:border-stone-800 flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs text-stone-500 font-medium flex items-center gap-1">
+                  <TagIcon className="h-3 w-3" /> Thẻ:
+                </span>
+                {book.tags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold"
+                    style={{
+                      backgroundColor: `${tag.color || '#1e3a2f'}18`,
+                      color: tag.color || '#1e3a2f',
+                    }}
+                  >
+                    #{tag.name}
+                  </span>
+                ))}
               </div>
             )}
           </div>
@@ -420,6 +465,14 @@ export default function BookDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Personal Ownership Info Modal */}
+      <EditPersonalInfoModal
+        isOpen={isEditPersonalModalOpen}
+        onClose={() => setIsEditPersonalModalOpen(false)}
+        book={book}
+        onSaved={() => refetch()}
+      />
 
       {/* Log Reading Session Modal */}
       <ReadingSessionModal
